@@ -26,7 +26,11 @@ h2 {
   height: 50px;
   margin: 5px;
   background-color: lightcoral;
+  &.hovered{ 
+    background-color: black;
+  }
 }
+  
 
 #instructions {
   width: 600px;
