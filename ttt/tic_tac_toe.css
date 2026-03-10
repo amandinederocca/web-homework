@@ -9,19 +9,11 @@ body{
 }
 
 
-.one {
+.vert {
     background-color: aquamarine;
-    &::before {
-        content: '\2022';
-        color: green;
-    }
 }
-.two {
+.rouge {
     background-color: pink;
-    &::before {
-        content: '\2717';
-        color: red;
-    }
 }
 
 .plateau{
