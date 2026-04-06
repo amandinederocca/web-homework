@@ -42,20 +42,20 @@ def read_root():
 def liste_asso():
     return associations_df.id.tolist()
 
-@app.get("/api/association/<int:id>")
+@app.get("/api/association/{id}")
 def details_asso(id: int):
     extract= associations_df[associations_df.id==id]
     if extract.empty:
         raise HTTPException(
             status_code=404,
             detail="Asociation not found")
-    return extract.to_dict(orient='records')[0]
+    return extract.to_dict(orient='records')[0]#renvoie une liste de dictionnaires json
 
 @app.get("/api/evenements")
 def liste_evenements():
     return evenements_df.id.tolist()
 
-@app.get("/api/evenement/<int:id>")
+@app.get("/api/evenement/{id}")
 def details_ev(id:int):
     extract=evenements_df[evenements_df.id==id]
     if extract.empty:
@@ -64,11 +64,17 @@ def details_ev(id:int):
             detail="Evenement not found")
     return extract.to_dict(orient='records')[0]#on renvoie les infos pour l'id demandé
 
-@app.get("/api/association/<int:id>/evenements")
-def liste_ev_asso(id:int):
-    extract=evenements_df[evenements_df.id==id]#renvoie les événements pour une asso
+@app.get("/api/association/{id}/evenements")
+def liste_ev_asso(id: int):
+    # récupère les événements dont la colonne 'association_id' correspond à l'ID reçu
+    extract = evenements_df[evenements_df.association_id == id]
+    return extract.to_dict(orient='records')#on renvoie la liste des dico d'évènements de cette asso
 
-@app.get("/api/associations/type/<type>")
-def liste_asso_partype():
+@app.get("/api/associations/type/{type}")
+def liste_asso_partype(type: str):
+    #filtre les associations par la colonne 'type'
+    extract = associations_df[associations_df.type == type]
+    return extract.to_dict(orient='records')#renvoie la liste des dico des assos par type
+
 
     
