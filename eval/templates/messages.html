@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Whats'app</title>
+</head>
+
+<body>
+    <h1>Mes messages</h1>
+    <ul class="messages">
+        {% for message in messages %}
+        <li class="message">
+            <div class="title">{{ message.title }}</div>
+            <div class="line">
+                <span>{{ message.description }}</span>
+                <input type="Lu" {% if message.done %}checked{%endif%} />
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
