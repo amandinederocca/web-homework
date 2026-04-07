@@ -70,7 +70,7 @@ def get_messages(session: SessionDep) -> list[Message]:
 
 @app.get("/api/messages/{message_id}")
 def get_messages(message_id: int, session: SessionDep) -> Message | None:
-    message = session.get(Message, message_id_id)
+    message = session.get(Message, message_id)
     return message
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -78,5 +78,42 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 #on veut générer une page html donc un affichage quand le message est créer
 templates = Jinja2Templates(directory="templates")
 #jinga insert the data from the fastAPI
+
+
+@app.get("/front/messages", response_class=HTMLResponse)
+def notes_page(request: Request, session: SessionDep):
+    # get the messages through the API, not directly from the database
+    url = request.url_for("get_messages")
+    response = requests.get(url)
+    if not (200 <= response.status_code < 300):
+        raise Exception(f"Error {response.status_code} while getting messages")
+    messages = response.json()
+    return templates.TemplateResponse(
+        request=request,
+        name="messages.html",
+        context={"version": VERSION, "notes": messages})
+
+# // the callback attached to clicking the "done" checkbox
+# // it is used verbatim in the HTML template
+# async function note_done_changed(elt, nodeId) {
+#     const done = elt.checked
+#     const url = `/api/notes/${nodeId}`
+#     const data = { done: done }
+#     const response = await fetch(url, {
+#       method: "PATCH",
+#       headers: {
+#         "Content-Type": "application/json",
+#       },
+#       body: JSON.stringify(data),
+#     })
+#     if (response.ok) {
+#       const data = await response.json()
+#       console.log(`${url} returned`, data)
+#     } else {
+#       console.error("Error updating note done status:", response.statusText)
+#     }
+#   }
+
+
 
 
