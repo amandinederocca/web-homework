@@ -14,6 +14,9 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
+from contextlib import asynccontextmanager
+from typing import Annotated
+from fastapi import WebSocket, WebSocketDisconnect
 
 
 
@@ -40,14 +43,20 @@ def get_session():
         yield session
 
 SessionDep = Annotated[Session, Depends(get_session)]
-# for now we'll use a single type for all operations on messages
-# BUT we'll see later on how to improve that
-class Message(SQLModel, table=True):#on créer la classe des messages
+# in this version we define several models for a message
+# that describe which fields exactly we want to support / expose
+# in each operation of the API
+class MessageCreate(SQLModel):
+    title: str | None = Field(default=None, description="nom de celui à qui j'envoie le message")
+    description: str | None = Field(default=None, description="Le texte du message")
+
+class MessageUpdate(MessageCreate):
+    done: bool = Field(default=False, description="Le message est lu ?")
+
+class Message(MessageUpdate, table=True):
     id: int | None = Field(default=None, primary_key=True)
     title: str
     description: str
-    sent: bool = False
-
 
 @app.get("/")
 async def root():
@@ -57,11 +66,27 @@ async def root():
 
 
 @app.post("/api/messages")
-def create_note(message: Message, session: SessionDep) -> Message:
-    session.add(message)
+async def create_note(message: MessageCreate, session: SessionDep) -> Message:
+    db_message = Message.model_validate(messagee)
+    session.add(db_message)
     session.commit()
-    session.refresh(message)
-    return message
+    session.refresh(db_message)
+    await websocket_broadcaster.broadcast(action="create", note=db_message)
+    return db_message
+    session.add(db_message)
+    session.commit()
+    session.refresh(db_message)
+    await websocket_broadcaster.broadcast(action="update", message=db_message)
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket_broadcaster.connect(websocket)
+    try:
+        while True:
+            # Optional: handle incoming messages if you want, or just keep alive
+            await websocket.receive_text()
+
 
 @app.get("/api/messages")#on affiche l'intégralité des messages
 def get_messages(session: SessionDep) -> list[Message]:
@@ -91,7 +116,18 @@ def notes_page(request: Request, session: SessionDep):
     return templates.TemplateResponse(
         request=request,
         name="messages.html",
-        context={"version": VERSION, "notes": messages})
+        context={"version": VERSION, "messages": messages})
+
+
+@app.delete("/api/messages/{message_id}")
+def delete_message(message_id: int, session: SessionDep):
+    db_message = session.get(Message, message_ide_id)
+    if not db_message:
+        raise HTTPException(status_code=404, detail=f"Note {message_id} not found")
+    # delete the message
+    session.delete(db_message)
+    session.commit()
+    return db_message
 
 # // the callback attached to clicking the "done" checkbox
 # // it is used verbatim in the HTML template

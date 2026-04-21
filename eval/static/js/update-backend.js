@@ -18,3 +18,19 @@ async function message_lu_changed(elt, nodeId) {
       console.error("Error updating message lu status:", response.statusText)
     }
   }
+
+  async function messagee_delete(elt, nodeId) {
+  const url = `/api/messages/${nodeId}`;
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (response.ok) {
+    const data = await response.json();
+    console.log(`${url} returned`, data);
+  } else {
+    console.error("Error deleting messagee:", response.statusText);
+  }
+}

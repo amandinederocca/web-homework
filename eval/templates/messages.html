@@ -10,15 +10,33 @@
 
 <body>
     <h1>Mes messages</h1>
+    <form id="add-message-form" action="/api/messages" method="POST">
+        <fieldset>
+            <legend>Write a new message</legend>
+            <input type="text" name="qui" placeholder="Title" required>
+            <input type="text" name="contenu" placeholder="Description" required>
+            <button type="submit">Send message</button>
+        </fieldset>
+    </form>
+
     <ul class="messages">
         {% for message in messages %}
         <li class="message">
-            <div class="title">{{ message.title }}</div>
+            <div class="title">{{ <message class="title"></message> }}</div>
             <div class="line">
-                <span>{{ message.description }}</span>
+                <span>{{ <message class="contenu"></message> }}</span>
                 <input type="Lu" {% if message.done %}checked{%endif%} />
-            </div>
-        </li>
+                <div class="title">{{ message.title }}</div>
+                <div class="title">{{ message.title }}
+                    <button class="delete-button" onclick="message_delete(this, {{ message.id }})">🗑</button>
+                </div>
+                <div class="line">
+                    <span>{{ note.description }}</span>
+                    <input type="checkbox" {% if message.done %}checked{%endif%}
+                </div>
+            </li>
         {% endfor %}
     </ul>
+    <script src="{{ url_for('static', path='/js/update-backend.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/forms-use-json.js') }}"></script>
 </body>
