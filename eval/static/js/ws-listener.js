@@ -11,18 +11,16 @@ document.addEventListener("DOMContentLoaded",
             const data = JSON.parse(event.data);
             console.log("Received data:", data);
                     // Handle the received data as needed
-            const { action, message } = data;
+            const { action, note } = data;
             switch (action) {
                 case "create":
-                    createMessageElement(message);
+                    createNoteElement(note);
                     break;
                 case "update":
-                    updateMessageElement(message);
+                    updateNoteElement(note);
                     break;
                 case "delete":
-                    deleteMessageElement(message.author_id);
-                    deleteMessageElement(message.content);
-                    deleteMessageElement(message.room_id);
+                    deleteNoteElement(note.id);
                     break;
                 default:
                     console.warn("Unknown action:", action);

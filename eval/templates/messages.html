@@ -21,7 +21,7 @@
 
     <ul class="messages">
         {% for message in messages %}
-        <li class="message">
+        <li id="message-{{message.id}}" class="message">
             <div class="title">{{ <message class="title"></message> }}</div>
             <div class="line">
                 <span>{{ <message class="contenu"></message> }}</span>

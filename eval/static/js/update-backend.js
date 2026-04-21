@@ -19,7 +19,7 @@ async function message_lu_changed(elt, nodeId) {
     }
   }
 
-  async function messagee_delete(elt, nodeId) {
+  async function message_delete(elt, nodeId) {
   const url = `/api/messages/${nodeId}`;
   const response = await fetch(url, {
     method: "DELETE",

@@ -24,39 +24,48 @@ from fastapi import WebSocket, WebSocketDisconnect
 SQLITE_URL = f"sqlite:///messages.db"
 engine = create_engine(SQLITE_URL)
 
-# this is how we control what is done at startup and shutdown
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # startup logic comes here
-    # Create the database and tables if they don't exist
     SQLModel.metadata.create_all(engine)
 
     yield
-    # shutdown logic comes here
-    # none so far
 
 app = FastAPI(lifespan=lifespan)
 
-# create a so-called "dependency" to get the database session
 def get_session():
     with Session(engine) as session:
         yield session
 
 SessionDep = Annotated[Session, Depends(get_session)]
-# in this version we define several models for a message
-# that describe which fields exactly we want to support / expose
-# in each operation of the API
+
+class UserCreate(SQLModel):
+    name: str = Field(description="Username")
+
+class User(UserCreate, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+
+class RoomCreate(SQLModel):
+    name: str = Field(description="Roomname")
+
+class Room(RoomCreate, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+
+class Subscription(SQLModel):
+    user_id: int = Field(description="User")
+    room_id: int = Field(description="Room")
+
 class MessageCreate(SQLModel):
-    title: str | None = Field(default=None, description="nom de celui à qui j'envoie le message")
-    description: str | None = Field(default=None, description="Le texte du message")
+    author_id: int | None = Field(default=None, description="nom de celui à qui j'envoie le message")
+    content: str | None = Field(default=None, description="Le texte du message")
+    room_id: int | None = Field(default=None, description="Le texte du message") 
 
 class MessageUpdate(MessageCreate):
     done: bool = Field(default=False, description="Le message est lu ?")
 
 class Message(MessageUpdate, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    title: str
-    description: str
+    author_id: int | None = Field(default=None, primary_key=True)
+    content: str
+    room_id: int
 
 @app.get("/")
 async def root():
@@ -66,8 +75,8 @@ async def root():
 
 
 @app.post("/api/messages")
-async def create_note(message: MessageCreate, session: SessionDep) -> Message:
-    db_message = Message.model_validate(messagee)
+async def create_message(message: MessageCreate, session: SessionDep) -> Message:
+    db_message = Message.model_validate(message)
     session.add(db_message)
     session.commit()
     session.refresh(db_message)
@@ -121,34 +130,15 @@ def notes_page(request: Request, session: SessionDep):
 
 @app.delete("/api/messages/{message_id}")
 def delete_message(message_id: int, session: SessionDep):
-    db_message = session.get(Message, message_ide_id)
+    db_message = session.get(Message, message_author_id)
     if not db_message:
-        raise HTTPException(status_code=404, detail=f"Note {message_id} not found")
+        raise HTTPException(status_code=404, detail=f"Note {message_author_id} not found")
     # delete the message
     session.delete(db_message)
     session.commit()
     return db_message
 
-# // the callback attached to clicking the "done" checkbox
-# // it is used verbatim in the HTML template
-# async function note_done_changed(elt, nodeId) {
-#     const done = elt.checked
-#     const url = `/api/notes/${nodeId}`
-#     const data = { done: done }
-#     const response = await fetch(url, {
-#       method: "PATCH",
-#       headers: {
-#         "Content-Type": "application/json",
-#       },
-#       body: JSON.stringify(data),
-#     })
-#     if (response.ok) {
-#       const data = await response.json()
-#       console.log(`${url} returned`, data)
-#     } else {
-#       console.error("Error updating note done status:", response.statusText)
-#     }
-#   }
+
 
 
 
