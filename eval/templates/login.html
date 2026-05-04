@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Sign in — Whats'app{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h2>Who are you?</h2>
+    {% if users %}
+        <p class="hint">Pick your username to enter the app.</p>
+        <ul class="user-list">
+            {% for u in users %}
+            <li>
+                <a class="user-pill" href="/front/rooms?user_id={{ u.id }}">{{ u.name }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty">
+            No users yet. Create one from the command line:<br>
+            <code>http POST http://localhost:8000/api/users name=alice</code>
+        </p>
+    {% endif %}
+</section>
+{% endblock %}

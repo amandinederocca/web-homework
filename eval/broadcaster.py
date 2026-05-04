@@ -1,34 +1,45 @@
+
 from typing import Literal
-
 import asyncio
-
 from fastapi import WebSocket
 
 Action = Literal["create", "update", "delete"]
 
+
 class WebSocketBroadcaster:
     """
-    registers active websocket connections
-    and broadcasts messages to all of them
+    Liste les connections aux websocket et diffuse les messages. Chaque connection est associée à une discussion donc on ne diffuse qu'aux membres de la discussion
     """
-    def __init__(self):
-        self.active_connections: list[WebSocket] = []
 
-    async def connect(self, websocket: WebSocket):
+    def __init__(self):
+        self.active_connections: list[tuple[WebSocket, int]] = []
+
+    async def connect(self, websocket: WebSocket, room_id: int):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        self.active_connections.append((websocket, room_id))
 
     def disconnect(self, websocket: WebSocket):
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
+        self.active_connections = [
+            (ws, rid) for (ws, rid) in self.active_connections if ws is not websocket
+        ]
 
-    # cannot import Note here, to avoid circular import
-    async def broadcast(self, action: Action, note: "Note"):
-        payload = { "action": action, "note": dict(note) }
-        coros = [ws.send_json(payload) for ws in self.active_connections]
+    async def broadcast(self, action: Action, message):
+        if hasattr(message, "model_dump"):
+            payload_message = message.model_dump()
+        else:
+            payload_message = dict(message)
+
+        room_id = payload_message.get("room_id")
+        payload = {"action": action, "message": payload_message}
+
+        targets = [ws for (ws, rid) in self.active_connections if rid == room_id]
+        if not targets:
+            return
+
+        coros = [ws.send_json(payload) for ws in targets]
         results = await asyncio.gather(*coros, return_exceptions=True)
 
-        # Clean up any that failed
-        for ws, result in zip(self.active_connections.copy(), results):
+        for ws, result in zip(targets, results):
             if isinstance(result, Exception):
                 self.disconnect(ws)
+

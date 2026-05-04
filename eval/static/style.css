@@ -1,78 +1,211 @@
-:root {
-  font-family: Arial, sans-serif;
-  background-color: #bec062;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    background: #ece5dd;
+    color: #111;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-body,
-ul,
-li {
-  margin: 0;
-  padding: 0;
+.topbar {
+    background: #075e54;
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.topbar h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: 0.02em; }
+.topbar .version { opacity: 0.6; font-size: 0.75rem; }
+
+
+main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
 }
 
-ul,
-li.message {
-  list-style: none;
-}
-
-h1 {
-  color: #377a45;
-  font-size: 2em;
-  text-align: center;
-}
-
-form {
-  input[name="description"] {
+.card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 2rem;
     width: 100%;
-    max-width: 40em;
-    background: rgb(66, 194, 119);
-    border-radius: 5px;
-  }
+    max-width: 640px;
+}
+
+.card h2 { margin-bottom: 0.5rem; font-size: 1.5rem; }
+.hint   { color: #c91986; font-size: 0.9rem; margin-bottom: 1rem; }
+.empty  { color: #eb2eac; padding: 1rem 0; }
+.empty code {
+    display: inline-block;
+    background: #68e94e;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85rem;
+}
+
+/*  login */
+.user-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+.user-pill {
+    display: inline-block;
+    padding: 0.55rem 1.1rem;
+    background: #25d366;
+    color: white;
+    text-decoration: none;
+    border-radius: 999px;
+    font-weight: 500;
+    transition: background 0.15s;
+}
+.user-pill:hover { background: #1eb858; }
+
+/* rooms*/
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.link-back {
+    color: #075e54;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.link-back:hover { text-decoration: underline; }
+
+.room-list { list-style: none; margin-top: 1rem; }
+.room-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 0.25rem;
+    border-bottom: 1px solid #eee;
+}
+.room-item:last-child { border-bottom: none; }
+.room-name { font-weight: 500; color: #333; }
+.room-actions { display: flex; gap: 0.5rem; }
+
+/* buttons */
+.btn {
+    padding: 0.45rem 0.9rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.15s;
+}
+.btn-primary   { background: #25d366; color: white; }
+.btn-primary:hover   { background: #1eb858; }
+.btn-secondary { background: #e0e0e0; color: #333; }
+.btn-secondary:hover { background: #cfcfcf; }
+.btn-enter     { background: #075e54; color: white; }
+.btn-enter:hover     { background: #054640; }
+
+/* discussions */
+.chat-card {
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+    padding: 0;
+    overflow: hidden;
+}
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: #f7f7f7;
+    border-bottom: 1px solid #eee;
+}
+.chat-header h2 { font-size: 1.1rem; flex: 1; }
+.badge {
+    background: #075e54;
+    color: white;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
 }
 
 .messages {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  margin: 50px;
+    list-style: none;
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    background: #ece5dd;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
 
-  .message {
-    /* color:  */
-    min-width: 10em;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    margin: 10px;
-    padding: 20px;
-    background-color: #ffe0e0;
-    border: 2px solid #922121;
+.message {
+    background: white;
+    padding: 0.55rem 0.75rem 0.55rem 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    max-width: 70%;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.06);
+    position: relative;
+    word-wrap: break-word;
+}
+.message.mine {
+    background: #dcf8c6;
+    margin-left: auto;
+}
+.msg-author {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #075e54;
+    margin-bottom: 0.15rem;
+}
+.message.mine .msg-author { color: #1eb858; }
+.msg-content { font-size: 0.95rem; line-height: 1.35; }
 
-    &:has(input:checked) {
-      background-color: #e0ffe0;
-      border: 1px solid #0e5825;
-      opacity: 0.5;
-    }
+.delete-button {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.35rem;
+    background: transparent;
+    border: none;
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+}
+.delete-button:hover { opacity: 1; }
 
-    .title {
-      color: rgb(125, 4, 109);
-      font-size: x-large;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1em;
-    }
-
-    .line {
-      display: flex;
-      justify-content: space-between;
-
-      span {
-        margin-right: 1em;
-      }
-    }
-
-    input[type="checkbox"] {
-      width: 1.5em;
-      height: 1.5em;
-    }
-  }
+#add-message-form {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: #f7f7f7;
+    border-top: 1px solid #eee;
+}
+#add-message-form input[type="text"] {
+    flex: 1;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    outline: none;
+}
+#add-message-form input[type="text"]:focus {
+    border-color: #25d366;
 }

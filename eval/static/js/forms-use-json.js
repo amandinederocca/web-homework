@@ -1,22 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll('form').forEach((form) => {
-        const formToJSON = form => Object.fromEntries(new FormData(form))
+    document.querySelectorAll("form").forEach((form) => {
         form.addEventListener("submit", async (event) => {
-          event.preventDefault()
+            event.preventDefault();
 
-          // use the action= attribute of the <form>
-          //  to determine where to send the data
-          const action = form.action
-          const json = formToJSON(form)
-          const response = await fetch(action, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(json),
-          })
-          if (!response.ok) {
-            console.error(`Error submitting form at ${action} : `, response.statusText)
-            return
-          }
-          const decoded = await response.json()
-          console.log("response", decoded)
-        }))
+            const json = {};
+            for (const [key, value] of new FormData(form).entries()) {
+                json[key] = /^-?\d+$/.test(value) ? Number(value) : value;
+            }
+
+            const response = await fetch(form.action, {
+                method: form.method || "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(json),
+            });
+
+            if (!response.ok) {
+                console.error(
+                    `Error submitting form at ${form.action}:`,
+                    response.statusText
+                );
+                return;
+            }
+            // we rely on the WebSocket to display the message back to us,
+            // so just clear the input.
+            form.reset();
+        });
+    });
+});

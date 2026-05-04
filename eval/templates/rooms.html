@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Rooms — Whats'app{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="room-header">
+        <h2>Hello, <strong>{{ user.name }}</strong></h2>
+        <a class="link-back" href="/front/login">switch user</a>
+    </div>
+
+    {% if rooms %}
+    <p class="hint">Subscribe to rooms you like, then enter one to start chatting.</p>
+    <ul class="room-list">
+        {% for r in rooms %}
+        <li class="room-item" id="room-{{ r.id }}">
+            <span class="room-name">#{{ r.name }}</span>
+            <div class="room-actions">
+                {% if r.id in subscribed_ids %}
+                    <button class="btn btn-secondary"
+                            onclick="toggleSubscription({{ user.id }}, {{ r.id }}, true, this)">
+                        Unsubscribe
+                    </button>
+                {% else %}
+                    <button class="btn btn-primary"
+                            onclick="toggleSubscription({{ user.id }}, {{ r.id }}, false, this)">
+                        Subscribe
+                    </button>
+                {% endif %}
+                <a class="btn btn-enter" href="/front/rooms/{{ r.id }}?user_id={{ user.id }}">
+                    Enter →
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p class="empty">
+            No rooms yet. Create one from the command line:<br>
+            <code>http POST http://localhost:8000/api/rooms name=social</code>
+        </p>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='/js/subscriptions.js') }}"></script>
+{% endblock %}

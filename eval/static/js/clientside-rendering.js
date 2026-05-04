@@ -1,45 +1,54 @@
-function createMessageElement(message) {
-    const elt = document.createElement("li");
-    elt.classList.add("note");
-    elt.id = `note-${note.id}`;
-    const html = `
-    <div class="author_id">${message.author_id}
-        <button class="delete-button" onclick="message_delete(this, ${message.author_id})">🗑</button>
-    </div>
-    <div class="room_id">${message.room_id}
-        <button class="delete-button" onclick="message_delete(this, ${message.room_id})">🗑</button>
-    </div>
-    <div class="content">
-        <span>${message.content}</span>
-        <input type="checkbox" ${message.lu ? "checked" : ""}
-        onchange="message_done_changed(this, ${message.id})" />
-    </div>
-`
-    elt.innerHTML = html;
-    document.querySelector("ul.messages").appendChild(elt);
+// Build / update / remove message DOM elements.
 
+function createMessageElement(message) {
+    const ctx = window.APP_CONTEXT;
+    const isMine = message.author_id === ctx.currentUserId;
+    const authorName = ctx.users[message.author_id] || `user#${message.author_id}`;
+
+    const elt = document.createElement("li");
+    elt.classList.add("message");
+    if (isMine) elt.classList.add("mine");
+    elt.id = `message-${message.id}`;
+
+    elt.innerHTML = `
+        <div class="msg-author">${escapeHtml(authorName)}</div>
+        <div class="msg-content">${escapeHtml(message.content)}</div>
+        ${isMine
+            ? `<button class="delete-button"
+                       onclick="deleteMessage(${message.id})"
+                       title="Delete">🗑</button>`
+            : ""}
+    `;
+
+    const list = document.querySelector("#messages-list");
+    list.appendChild(elt);
+    list.scrollTop = list.scrollHeight;
 }
 
 function updateMessageElement(message) {
-    const id = message.id;
-    const elt = document.querySelector(`#message-${id}`);
+    const elt = document.querySelector(`#message-${message.id}`);
     if (!elt) {
-        console.warn("Message element not found for ID:", id);
+        console.warn("Message element not found for ID:", message.id);
         return;
     }
-    elt.querySelector(".int").textContent = message.author_id;
-    elt.querySelector(".int").textContent = message.room_id;
-    elt.querySelector("span").textContent = message.content;
-    elt.querySelector("input[type='checkbox']").checked = message.lu ? "checked" : "";
-
+    const contentSpan = elt.querySelector(".msg-content");
+    if (contentSpan) contentSpan.textContent = message.content;
 }
 
-function deleteMessageElement(noteId) {
-    const elt = document.querySelector(`#note-${noteId}`);
+function deleteMessageElement(messageId) {
+    const elt = document.querySelector(`#message-${messageId}`);
     if (elt) {
         elt.remove();
     } else {
-        console.warn("Note element not found for ID:", noteId);
+        console.warn("Message element not found for ID:", messageId);
     }
+}
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

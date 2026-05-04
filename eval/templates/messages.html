@@ -1,42 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <title>Whats'app</title>
-</head>
+<section class="card chat-card">
+    <div class="chat-header">
+        <a class="link-back" href="/front/rooms?user_id={{ user.id }}">← rooms</a>
+        <h2>#{{ room.name }}</h2>
+        <span class="badge">{{ user.name }}</span>
+    </div>
 
-<body>
-    <h1>Mes messages</h1>
-    <form id="add-message-form" action="/api/messages" method="POST">
-        <fieldset>
-            <legend>Write a new message</legend>
-            <input type="text" name="qui" placeholder="Title" required>
-            <input type="text" name="contenu" placeholder="Description" required>
-            <button type="submit">Send message</button>
-        </fieldset>
-    </form>
-
-    <ul class="messages">
-        {% for message in messages %}
-        <li id="message-{{message.id}}" class="message">
-            <div class="title">{{ <message class="title"></message> }}</div>
-            <div class="line">
-                <span>{{ <message class="contenu"></message> }}</span>
-                <input type="Lu" {% if message.done %}checked{%endif%} />
-                <div class="title">{{ message.title }}</div>
-                <div class="title">{{ message.title }}
-                    <button class="delete-button" onclick="message_delete(this, {{ message.id }})">🗑</button>
-                </div>
-                <div class="line">
-                    <span>{{ note.description }}</span>
-                    <input type="checkbox" {% if message.done %}checked{%endif%}
-                </div>
-            </li>
+    <ul class="messages" id="messages-list">
+        {% for m in messages %}
+        <li id="message-{{ m.id }}"
+            class="message {% if m.author_id == user.id %}mine{% endif %}">
+            <div class="msg-author">{{ m.author_name }}</div>
+            <div class="msg-content">{{ m.content }}</div>
+            {% if m.author_id == user.id %}
+            <button class="delete-button"
+                    onclick="deleteMessage({{ m.id }})"
+                    title="Delete">🗑</button>
+            {% endif %}
+        </li>
         {% endfor %}
     </ul>
-    <script src="{{ url_for('static', path='/js/update-backend.js') }}"></script>
-    <script src="{{ url_for('static', path='/js/forms-use-json.js') }}"></script>
-</body>
+
+    <form id="add-message-form"
+          action="/api/messages"
+          method="POST"
+          data-current-user-id="{{ user.id }}"
+          data-room-id="{{ room.id }}">
+        <input type="hidden" name="author_id" value="{{ user.id }}">
+        <input type="hidden" name="room_id" value="{{ room.id }}">
+        <input type="text" name="content" placeholder="Write a message…"
+               autocomplete="off" required>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</section>
+
+<script>
+    window.APP_CONTEXT = {
+        currentUserId: {{ user.id }},
+        roomId: {{ room.id }},
+        users: {{ users | tojson }}
+    };
+</script>
+
+<script src="{{ url_for('static', path='/js/clientside-rendering.js') }}"></script>
+<script src="{{ url_for('static', path='/js/update-backend.js') }}"></script>
+<script src="{{ url_for('static', path='/js/forms-use-json.js') }}"></script>
+<script src="{{ url_for('static', path='/js/ws-listener.js') }}"></script>
